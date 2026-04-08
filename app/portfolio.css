@@ -1,0 +1,42 @@
+.dither-bg {
+    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+    background-size: 4px 4px;
+}
+
+.cyan-glow:focus-within {
+    box-shadow: 0 0 15px rgba(0, 251, 251, 0.2);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1 }
+  50% { opacity: 0 }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0) }
+  100% { transform: translateX(-50%) }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent iOS auto-zoom on input focus */
+@media (max-width: 767px) {
+  .terminal-input {
+    font-size: 16px !important;
+  }
+}

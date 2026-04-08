@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm show:*)",
+      "Bash(npm install:*)",
+      "Bash(SUPABASE_ACCESS_TOKEN=\"sbp_493dac15b2cf1a17d91970a09d8237ae44176e15\" npx supabase db query --linked -f supabase/schema.sql)",
+      "Bash(cp \"C:/Users/Abed Kadaan/Desktop/abedkadaan/app/\\(dashboard\\)/layout.tsx\" \"/tmp/dash_layout_bak.tsx\")",
+      "Bash(cp \"C:/Users/Abed Kadaan/Desktop/abedkadaan/app/\\(dashboard\\)/page.tsx.bak\" \"/tmp/dash_page_bak.tsx\")",
+      "Bash(cp \"/tmp/dash_layout_bak.tsx\" \"C:/Users/Abed Kadaan/Desktop/abedkadaan/app/dashboard/layout.tsx\")",
+      "Bash(cp \"/tmp/dash_page_bak.tsx\" \"C:/Users/Abed Kadaan/Desktop/abedkadaan/app/dashboard/page.tsx\")",
+      "Bash(rm app/api/prepare-site/route.ts app/api/prepare-site/fetch-reviews.ts app/api/prepare-site/generate-copy.ts app/api/prepare-site/fetch-images.ts)",
+      "Bash(rm -rf app/api/prepare-site/generate-ai)",
+      "WebSearch"
+    ]
+  }
+}
