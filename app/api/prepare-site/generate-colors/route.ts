@@ -36,7 +36,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   let colorSystem: ColorSystem;
   try {
-    colorSystem = await generateColorSystem(category, name, provider);
+    colorSystem = await generateColorSystem(category, name);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Color generation failed';
     return NextResponse.json({ error: message }, { status: 500 });
