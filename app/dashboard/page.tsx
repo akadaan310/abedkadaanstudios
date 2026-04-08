@@ -75,7 +75,7 @@ export default function DashboardPage() {
         : [];
       const { businesses: _b, ...rest } = row;
       void _b;
-      return { ...(rest as Lead), business_slug: businessesArr[0]?.slug ?? undefined };
+      return { ...(rest as unknown as Lead), business_slug: businessesArr[0]?.slug ?? undefined };
     });
     setLeads(mapped);
     setLoading(false);

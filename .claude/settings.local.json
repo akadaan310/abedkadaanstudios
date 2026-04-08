@@ -10,7 +10,8 @@
       "Bash(cp \"/tmp/dash_page_bak.tsx\" \"C:/Users/Abed Kadaan/Desktop/abedkadaan/app/dashboard/page.tsx\")",
       "Bash(rm app/api/prepare-site/route.ts app/api/prepare-site/fetch-reviews.ts app/api/prepare-site/generate-copy.ts app/api/prepare-site/fetch-images.ts)",
       "Bash(rm -rf app/api/prepare-site/generate-ai)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run:*)"
     ]
   }
 }

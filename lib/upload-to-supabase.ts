@@ -22,7 +22,7 @@ export async function uploadToSupabase(
     buffer = Buffer.from(arrayBuffer);
     contentType = res.headers.get('content-type') ?? 'image/jpeg';
   } else if (source.startsWith('data:')) {
-    const matches = source.match(/^data:([^;]+);base64,(.+)$/s);
+    const matches = source.match(/^data:([^;]+);base64,(.+)$/);
     if (!matches) throw new Error('Invalid data URL format');
     contentType = matches[1];
     buffer = Buffer.from(matches[2], 'base64');

@@ -13,7 +13,7 @@ type Step1Phase = 'idle' | 'fetching_reviews' | 'reviews_ready' | 'generating_co
 type Step2Phase = 'idle' | 'fetching_images' | 'ready';
 type Step3Phase = 'idle' | 'generating_colors' | 'colors_ready';
 type LLMProvider = 'anthropic' | 'gemini';
-type ImageProvider = 'gemini' | 'claude';
+type ImageProvider = 'gemini';
 
 interface FinalizeResponse {
   siteUrl: string;
@@ -152,7 +152,10 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
   const [aiGalleryImageUrls, setAiGalleryImageUrls] = useState<string[]>([]);
   const [heroImage, setHeroImage] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [imageProvider, setImageProvider] = useState<ImageProvider>('gemini');
+  const imageProvider: ImageProvider = 'gemini';
+  const [hideGallery, setHideGallery] = useState(false);
+  const [heroImagePrompt, setHeroImagePrompt] = useState<string | null>(null);
+  const [galleryImagePrompt, setGalleryImagePrompt] = useState<string | null>(null);
   const [aiHeroCount, setAiHeroCount] = useState(1);
   const [aiGalleryCount, setAiGalleryCount] = useState(6);
   const [aiHeroLoading, setAiHeroLoading] = useState(false);
@@ -228,6 +231,8 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
         provider: copyProvider,
       });
       setCopy(data.copy);
+      setHeroImagePrompt(data.copy.hero_image_prompt ?? null);
+      setGalleryImagePrompt(data.copy.gallery_image_prompt ?? null);
       setStep1Phase('copy_ready');
     } catch (err) {
       setStep1Error(err instanceof Error ? err.message : 'Unknown error');
@@ -273,6 +278,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
         provider: imageProvider,
         count: aiHeroCount,
         purpose: 'hero',
+        customPrompt: heroImagePrompt ?? undefined,
       });
       setAiHeroImageUrls((prev) => [...prev, ...data.urls]);
     } catch (err) {
@@ -291,6 +297,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
         provider: imageProvider,
         count: aiGalleryCount,
         purpose: 'gallery',
+        customPrompt: galleryImagePrompt ?? undefined,
       });
       setAiGalleryImageUrls((prev) => [...prev, ...data.urls]);
     } catch (err) {
@@ -372,6 +379,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
         photoHero: heroImage,
         photosGallery: galleryImages,
         photosAiGenerated: isAIFallback,
+        hideGallery,
       });
       setFinalizeResult(data);
       onComplete(data.siteUrl);
@@ -410,7 +418,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="w-full h-full object-cover" />
+              <img src={url} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               {isLocked && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <span className="text-white text-[10px] font-bold leading-tight text-center px-1">HERO 🔒</span>
@@ -681,6 +689,9 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
 
   function renderStep2a() {
     const heroSet = new Set(heroImage ? [heroImage] : []);
+    function toggleHero(url: string) {
+      setHeroImage((prev) => (prev === url ? null : url));
+    }
 
     return (
       <div>
@@ -706,7 +717,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
                   Google Maps Photos <span className="font-normal normal-case text-zinc-400">({imageUrls.length} found) — click to select hero</span>
                 </p>
-                {renderImageGrid(imageUrls, heroSet, (url) => setHeroImage(url))}
+                {renderImageGrid(imageUrls, heroSet, toggleHero)}
               </div>
             ) : (
               <div className="rounded-xl bg-zinc-50 border border-zinc-200 p-4 mb-6">
@@ -721,7 +732,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
                   AI Hero Images <span className="font-normal normal-case text-zinc-400">({aiHeroImageUrls.length}) — click to select</span>
                 </p>
-                {renderImageGrid(aiHeroImageUrls, heroSet, (url) => setHeroImage(url))}
+                {renderImageGrid(aiHeroImageUrls, heroSet, toggleHero)}
               </div>
             )}
 
@@ -730,29 +741,16 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
               <div className="mb-6">
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Hero Preview</p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={heroImage} alt="Hero preview" className="w-full max-h-52 object-cover rounded-xl border border-zinc-200" />
+                <img src={heroImage} alt="Hero preview" referrerPolicy="no-referrer" className="w-full max-h-52 object-cover rounded-xl border border-zinc-200" />
               </div>
             )}
 
             {/* Unsplash search panel */}
-            {renderUnsplashPanel(heroSet, (url) => setHeroImage(url))}
+            {renderUnsplashPanel(heroSet, toggleHero)}
 
             {/* AI generation panel */}
             <div className="rounded-xl bg-zinc-50 border border-zinc-200 p-4 space-y-3 mb-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-zinc-700">AI Image Generation</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">Provider:</span>
-                  <select
-                    value={imageProvider}
-                    onChange={(e) => setImageProvider(e.target.value as ImageProvider)}
-                    className="text-xs bg-white border border-zinc-300 rounded-lg px-2.5 py-1.5 text-zinc-700 focus:outline-none focus:border-zinc-400"
-                  >
-                    <option value="gemini">Google Gemini Imagen</option>
-                    <option value="claude">Anthropic Claude</option>
-                  </select>
-                </div>
-              </div>
+              <p className="text-sm font-semibold text-zinc-700">AI Image Generation <span className="text-xs font-normal text-zinc-400">via Google Gemini</span></p>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 bg-white border border-zinc-300 rounded-lg px-2 py-1.5">
                   <input
@@ -839,20 +837,7 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
 
         {/* AI gallery generation panel */}
         <div className="rounded-xl bg-zinc-50 border border-zinc-200 p-4 space-y-3 mb-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-zinc-700">AI Image Generation</p>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-500">Provider:</span>
-              <select
-                value={imageProvider}
-                onChange={(e) => setImageProvider(e.target.value as ImageProvider)}
-                className="text-xs bg-white border border-zinc-300 rounded-lg px-2.5 py-1.5 text-zinc-700 focus:outline-none focus:border-zinc-400"
-              >
-                <option value="gemini">Google Gemini Imagen</option>
-                <option value="claude">Anthropic Claude</option>
-              </select>
-            </div>
-          </div>
+          <p className="text-sm font-semibold text-zinc-700">AI Image Generation <span className="text-xs font-normal text-zinc-400">via Google Gemini</span></p>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 bg-white border border-zinc-300 rounded-lg px-2 py-1.5">
               <input
@@ -875,6 +860,20 @@ export function PrepareWizard({ leadId, leadName, leadAddress, leadPhone, onClos
           {aiGalleryError && <p className="text-xs text-red-500">{aiGalleryError}</p>}
           <p className="text-[11px] text-zinc-400">Generates varied service/work photos for the gallery. Max 20 at a time.</p>
         </div>
+
+        {/* Hide gallery toggle */}
+        <label className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 cursor-pointer mb-6">
+          <input
+            type="checkbox"
+            checked={hideGallery}
+            onChange={(e) => setHideGallery(e.target.checked)}
+            className="w-4 h-4 rounded accent-zinc-900 cursor-pointer"
+          />
+          <div>
+            <p className="text-sm font-medium text-zinc-700">Hide gallery section on the website</p>
+            <p className="text-xs text-zinc-400 mt-0.5">The gallery will not be shown on the published site.</p>
+          </div>
+        </label>
 
         <div className="flex items-center justify-between">
           <button

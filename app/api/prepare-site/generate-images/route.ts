@@ -8,6 +8,7 @@ interface RequestBody {
   provider: 'gemini' | 'claude';
   count: number;
   purpose: 'hero' | 'gallery';
+  customPrompt?: string;
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const { leadId, provider, count, purpose } = body;
+  const { leadId, provider, count, purpose, customPrompt } = body;
   if (!leadId) return NextResponse.json({ error: 'leadId is required' }, { status: 400 });
   if (provider !== 'gemini' && provider !== 'claude') {
     return NextResponse.json({ error: 'provider must be gemini or claude' }, { status: 400 });
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   let urls: string[];
   try {
-    urls = await generateAIImages(category, cityState, count, provider, slug, supabase, purpose);
+    urls = await generateAIImages(category, cityState, count, provider, slug, supabase, purpose, customPrompt);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Image generation failed';
     return NextResponse.json({ error: message }, { status: 500 });

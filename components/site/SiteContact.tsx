@@ -30,10 +30,10 @@ export function SiteContact({ phone, address, hours }: Props) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+        <div className={`grid grid-cols-1 gap-10 ${mapSrc ? 'lg:grid-cols-5' : 'lg:grid-cols-1'}`}>
 
-          {/* Left — details (2 cols) */}
-          <div className="lg:col-span-2">
+          {/* Left — details */}
+          <div className={mapSrc ? 'lg:col-span-2' : 'lg:w-2/5 lg:mx-auto w-full'}>
             <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-text-light)]/10 shadow-sm p-6 space-y-8">
               {/* Address */}
               {address && (
@@ -73,9 +73,9 @@ export function SiteContact({ phone, address, hours }: Props) {
             </div>
           </div>
 
-          {/* Right — map (3 cols) */}
-          <div className="lg:col-span-3 rounded-2xl overflow-hidden min-h-[380px] border border-[var(--color-text-light)]/10">
-            {mapSrc ? (
+          {/* Right — map (only when address exists) */}
+          {mapSrc && (
+            <div className="lg:col-span-3 rounded-2xl overflow-hidden min-h-[380px] border border-[var(--color-text-light)]/10">
               <iframe
                 src={mapSrc}
                 title="Business location map"
@@ -83,12 +83,8 @@ export function SiteContact({ phone, address, hours }: Props) {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-            ) : (
-              <div className="w-full h-full min-h-[380px] bg-[var(--color-surface)] flex items-center justify-center text-sm text-[var(--color-text-light)]">
-                Address not available
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

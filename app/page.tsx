@@ -141,10 +141,12 @@ export default async function Page() {
         businessId={business.id}
       />
 
-      <SiteGallery
-        photos={business.photos_gallery ?? []}
-        city={business.address?.city ?? ''}
-      />
+      {!business.hide_gallery && (
+        <SiteGallery
+          photos={business.photos_gallery ?? []}
+          city={business.address?.city ?? ''}
+        />
+      )}
 
       <SiteContact
         phone={business.phone}

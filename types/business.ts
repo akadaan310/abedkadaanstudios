@@ -7,6 +7,8 @@ export interface BusinessCopy {
   seo_title: string;
   seo_description: string;
   seo_keywords: string[];
+  hero_image_prompt: string;
+  gallery_image_prompt: string;
 }
 
 export interface ColorSystem {
@@ -40,6 +42,7 @@ export interface Business {
   photo_hero: string | null;
   photos_gallery: string[];
   photos_ai_generated: boolean;
+  hide_gallery: boolean;
   color_system: ColorSystem;
   created_at: string;
   // populated via join

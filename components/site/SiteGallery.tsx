@@ -48,7 +48,7 @@ export function SiteGallery({ photos, city }: Props) {
           <div className="flex items-center gap-3 mb-4">
             <span className="w-8 h-px bg-[var(--color-accent)]" />
             <span className="text-[var(--color-accent)] text-xs font-semibold uppercase tracking-[0.2em]">
-              Portfolio
+              Gallery
             </span>
           </div>
           <h2 className="font-[var(--font-display)] text-4xl sm:text-5xl font-bold text-[var(--color-text)] leading-tight tracking-tight">

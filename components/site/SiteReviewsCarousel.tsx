@@ -19,7 +19,8 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-export function SiteReviewsCarousel({ reviews }: Props) {
+export function SiteReviewsCarousel({ reviews: rawReviews }: Props) {
+  const reviews = rawReviews.filter((r) => r.text?.trim());
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState<'left' | 'right'>('right');
   const [animKey, setAnimKey] = useState(0);

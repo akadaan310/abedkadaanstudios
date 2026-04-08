@@ -12,6 +12,7 @@ interface RequestBody {
   photoHero: string;
   photosGallery: string[];
   photosAiGenerated: boolean;
+  hideGallery: boolean;
 }
 
 async function resolveUniqueSlug(base: string, supabase: ReturnType<typeof createClient>): Promise<string> {
@@ -30,7 +31,7 @@ async function resolveUniqueSlug(base: string, supabase: ReturnType<typeof creat
 
 export async function POST(req: NextRequest) {
   const body: RequestBody = await req.json();
-  const { leadId, copy, photosAiGenerated, photoHero, photosGallery } = body;
+  const { leadId, copy, photosAiGenerated, photoHero, photosGallery, hideGallery } = body;
   let { colorSystem } = body;
 
   const supabase = createClient();
@@ -52,8 +53,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Reuse existing slug if this lead already has a business, otherwise generate a new unique one
+  const { data: existingBusiness } = await supabase
+    .from('businesses')
+    .select('id, slug')
+    .eq('lead_id', leadId)
+    .maybeSingle();
+
   const baseSlug = generateSlug(lead.name ?? leadId);
-  const slug = await resolveUniqueSlug(baseSlug, supabase);
+  const slug = existingBusiness?.slug ?? await resolveUniqueSlug(baseSlug, supabase);
 
   const uploadedHero = await uploadToSupabase(photoHero, 'hero', slug, supabase);
 
@@ -63,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   const { data: business, error: insertError } = await supabase
     .from('businesses')
-    .insert({
+    .upsert({
       lead_id: leadId,
       name: lead.name,
       slug,
@@ -83,13 +91,14 @@ export async function POST(req: NextRequest) {
       photo_hero: uploadedHero,
       photos_gallery: uploadedGallery,
       photos_ai_generated: photosAiGenerated,
+      hide_gallery: hideGallery ?? false,
       color_system: colorSystem,
-    })
+    }, { onConflict: 'lead_id' })
     .select('id')
     .single();
 
   if (insertError || !business) {
-    return NextResponse.json({ error: 'Failed to create business' }, { status: 500 });
+    return NextResponse.json({ error: insertError?.message ?? 'Failed to create business' }, { status: 500 });
   }
 
   await supabase

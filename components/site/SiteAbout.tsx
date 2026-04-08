@@ -46,8 +46,8 @@ export function SiteAbout({ text, rating, reviewCount }: Props) {
             </span>
 
             <div className="relative grid grid-cols-2 gap-px bg-[var(--color-text-light)]/10 rounded-2xl overflow-hidden border border-[var(--color-text-light)]/10">
-              {/* Stat 1 — Rating */}
-              {rating !== null && (
+              {/* Stat 1 — Rating (only shown if >= 4.2, otherwise generic) */}
+              {rating !== null && rating >= 4.2 ? (
                 <div className="bg-[var(--color-surface)] p-8">
                   <p className="font-[var(--font-display)] text-5xl font-bold text-[var(--color-primary)] mb-1">
                     {rating.toFixed(1)}
@@ -64,6 +64,14 @@ export function SiteAbout({ text, rating, reviewCount }: Props) {
                     ))}
                   </div>
                   <p className="text-xs text-[var(--color-text-light)] uppercase tracking-widest font-medium">Google Rating</p>
+                </div>
+              ) : (
+                <div className="bg-[var(--color-surface)] p-8">
+                  <p className="font-[var(--font-display)] text-5xl font-bold text-[var(--color-primary)] mb-1">
+                    Pro
+                  </p>
+                  <p className="text-sm text-[var(--color-text-light)] mb-2">Certified service</p>
+                  <p className="text-xs text-[var(--color-text-light)] uppercase tracking-widest font-medium">Licensed & Insured</p>
                 </div>
               )}
 
@@ -90,10 +98,10 @@ export function SiteAbout({ text, rating, reviewCount }: Props) {
               {/* Stat 4 */}
               <div className="bg-[var(--color-surface)] p-8">
                 <p className="font-[var(--font-display)] text-5xl font-bold text-[var(--color-primary)] mb-1">
-                  24/7
+                  5★
                 </p>
-                <p className="text-sm text-[var(--color-text-light)] mb-2">Emergency support</p>
-                <p className="text-xs text-[var(--color-text-light)] uppercase tracking-widest font-medium">Always Ready</p>
+                <p className="text-sm text-[var(--color-text-light)] mb-2">Service standard</p>
+                <p className="text-xs text-[var(--color-text-light)] uppercase tracking-widest font-medium">Every Time</p>
               </div>
             </div>
           </div>

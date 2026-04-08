@@ -39,7 +39,9 @@ Write website copy for this business. Return ONLY a valid JSON object with no ma
   "cta_tagline": "short call to action phrase",
   "seo_title": "SEO page title including business name and city",
   "seo_description": "meta description 140-160 chars",
-  "seo_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+  "seo_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+  "hero_image_prompt": "A detailed AI image generation prompt for a dramatic full-width hero photo that fits this specific business. Must be landscape orientation, no people, no text, no logos. Describe the scene, lighting, mood, and environment specific to ${category}.",
+  "gallery_image_prompt": "A detailed AI image generation prompt for professional service/work photos that fit this specific business. Must be varied scenes showing the craft, tools, workspace, or finished work. No people, no text, no logos. Specific to ${category}."
 }`;
 }
 
@@ -47,7 +49,7 @@ async function generateWithAnthropic(prompt: string): Promise<BusinessCopy> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
   const message = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+    max_tokens: 2500,
     messages: [{ role: 'user', content: prompt }],
   });
   const raw = (message.content[0] as { type: string; text: string }).text;
