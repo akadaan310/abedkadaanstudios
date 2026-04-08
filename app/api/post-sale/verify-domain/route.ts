@@ -6,14 +6,14 @@ export async function POST(req: NextRequest) {
 
   const supabase = createClient();
 
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from('custom_domains')
     .update({ verified: true })
     .eq('business_id', businessId)
     .eq('domain', domain)
-    .select('id', { count: 'exact', head: true });
+    .select('id');
 
-  if (error || !count) {
+  if (error || !data?.length) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
