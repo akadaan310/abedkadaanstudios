@@ -33,9 +33,15 @@ export async function generateAIImages(
           },
         });
 
-        const parts = response.candidates?.[0]?.content?.parts ?? [];
-        const imagePart = parts.find((p: { inlineData?: { data: string; mimeType: string } }) => p.inlineData);
-        if (!imagePart?.inlineData) continue;
+        const parts = (response.candidates?.[0]?.content?.parts ?? []) as unknown[];
+        type ImagePart = { inlineData: { data: string; mimeType: string } };
+        const imagePart = parts.find(
+          (p): p is ImagePart =>
+            typeof p === 'object' && p !== null &&
+            'inlineData' in p &&
+            typeof (p as ImagePart).inlineData?.data === 'string'
+        );
+        if (!imagePart) continue;
 
         const url = await uploadToSupabase(
           imagePart.inlineData.data,
