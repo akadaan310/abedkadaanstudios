@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { generateAIImages } from '@/app/api/prepare-site/generate-images';
 import { generateSlug } from '@/lib/generate-slug';
 
+export const maxDuration = 300;
+
 interface RequestBody {
   leadId: string;
   provider: 'gemini' | 'claude';

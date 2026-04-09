@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { ApifyPlace } from '@/types/lead';
 import { ingestPlaces } from './process';
 
+export const maxDuration = 300; // seconds — requires Vercel Pro or higher
+
 interface ApifyRunResponse {
   data?: {
     id?: string;

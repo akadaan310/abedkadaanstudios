@@ -11,6 +11,7 @@ import type { ScoreLabel, LeadStatus } from '@/types/dashboard';
 type ScoreFilter = 'all' | ScoreLabel;
 type StatusFilter = 'all' | LeadStatus;
 type SortKey = 'score' | 'discovered' | 'reviews' | 'name';
+type LocationFilter = Set<string>;
 
 const SCORE_ORDER: Record<string, number> = { hot: 0, warm: 1, cold: 2 };
 
@@ -44,6 +45,8 @@ export default function DashboardPage() {
 
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>(new Set());
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
   const [nameSearch, setNameSearch] = useState('');
   const [nameSearchDebounced, setNameSearchDebounced] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('score');
@@ -83,6 +86,14 @@ export default function DashboardPage() {
 
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
+  function toggleLocation(loc: string) {
+    setLocationFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(loc)) next.delete(loc); else next.add(loc);
+      return next;
+    });
+  }
+
   function handleUpdate(id: string, updated: Partial<Lead>) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
   }
@@ -91,16 +102,28 @@ export default function DashboardPage() {
     handleUpdate(id, { status });
   }
 
+  const locationOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const lead of leads) {
+      const loc = lead.location_query;
+      if (loc) counts.set(loc, (counts.get(loc) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([loc, count]) => ({ loc, count }));
+  }, [leads]);
+
   const filtered = useMemo(() => {
     let result = leads;
     if (scoreFilter !== 'all') result = result.filter((l) => l.score_label === scoreFilter);
     if (statusFilter !== 'all') result = result.filter((l) => l.status === statusFilter);
+    if (locationFilter.size > 0) result = result.filter((l) => l.location_query && locationFilter.has(l.location_query));
     if (nameSearchDebounced.trim()) {
       const q = nameSearchDebounced.trim().toLowerCase();
       result = result.filter((l) => l.name?.toLowerCase().includes(q));
     }
     return sortLeads(result, sortKey);
-  }, [leads, scoreFilter, statusFilter, nameSearchDebounced, sortKey]);
+  }, [leads, scoreFilter, statusFilter, locationFilter, nameSearchDebounced, sortKey]);
 
   const stats = useMemo(() => ({
     total: leads.length,
@@ -215,6 +238,70 @@ export default function DashboardPage() {
               </button>
             ))}
           </div>
+
+          {/* Location filter */}
+          {locationOptions.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setLocationDropdownOpen((o) => !o)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                  locationFilter.size > 0
+                    ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
+                    : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="opacity-70">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+                </svg>
+                {locationFilter.size === 0 ? 'All locations' : `${locationFilter.size} location${locationFilter.size > 1 ? 's' : ''}`}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-60">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              {locationDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setLocationDropdownOpen(false)} />
+                  <div className="absolute left-0 top-full mt-1.5 z-20 bg-neutral-900 border border-neutral-700 rounded-xl shadow-2xl shadow-black/50 overflow-hidden min-w-[220px] max-h-64 overflow-y-auto">
+                    {locationFilter.size > 0 && (
+                      <button
+                        onClick={() => { setLocationFilter(new Set()); }}
+                        className="flex items-center w-full px-3 py-2 text-xs text-neutral-500 hover:text-white hover:bg-neutral-800 transition-colors border-b border-neutral-800"
+                      >
+                        Clear selection
+                      </button>
+                    )}
+                    {locationOptions.map(({ loc, count }) => (
+                      <button
+                        key={loc}
+                        onClick={() => toggleLocation(loc)}
+                        className={`flex items-center justify-between w-full px-3 py-2 text-xs transition-colors ${
+                          locationFilter.has(loc)
+                            ? 'bg-indigo-500/15 text-indigo-300'
+                            : 'text-neutral-300 hover:bg-neutral-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 text-left">
+                          <span className={`w-3.5 h-3.5 rounded flex-shrink-0 border flex items-center justify-center ${
+                            locationFilter.has(loc) ? 'bg-indigo-500 border-indigo-500' : 'border-neutral-600'
+                          }`}>
+                            {locationFilter.has(loc) && (
+                              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </span>
+                          {loc}
+                        </span>
+                        <span className="ml-3 flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-neutral-800 text-neutral-400">
+                          {count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Search */}
           <div className="relative">

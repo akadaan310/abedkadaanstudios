@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { ApifyReview, Review } from '@/types/lead';
 
+export const maxDuration = 300;
+
 interface ApifyRunResponse {
   data?: {
     id?: string;
